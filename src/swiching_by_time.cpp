@@ -19,7 +19,7 @@ std_srvs::SetBool::Response resp_ler;           // レスポンスの生成
 geometry_msgs::PoseWithCovarianceStamped pose_msg;
 ros::Publisher initial_pose_pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("initialpose", 10);
 
-void pose_set(float pose_x,float pose_y,float ori_z)
+void pose_set(float pose_x,float pose_y,float ori_z,float ori_w)
     {
     pose_msg.header.stamp = ros::Time::now();
     pose_msg.header.frame_id = "map";
@@ -31,7 +31,7 @@ void pose_set(float pose_x,float pose_y,float ori_z)
     //pose_msg.pose.pose.orientation.z = sin(alpha/2);
     //pose_msg.pose.pose.orientation.w = cos(alpha/2);
     pose_msg.pose.pose.orientation.z = ori_z;
-    pose_msg.pose.pose.orientation.w = 1.0;
+    pose_msg.pose.pose.orientation.w = ori_w;
  
     }
 //callbackの前にreq.dataで分ける
@@ -42,10 +42,10 @@ std_srvs::SetBool::Response &resp_ler)
         {
         case 1:
             wait_t = 20.0;
-            pose_set(2.2,1.0,1);
+            pose_set(-63.35,-105.17,0.96,0.279);
         case 2:
             wait_t = 10.0;
-            pose_set(0,0,0);
+            pose_set(0,0,0,0);
         }
  } 
 
