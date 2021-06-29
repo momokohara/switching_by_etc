@@ -156,6 +156,12 @@ target_link_libraries(
     ${catkin_LIBRARIES}
 )
 
+add_executable(swiching_by_time src/swiching_by_time.cpp)
+target_link_libraries(
+    swiching_by_time
+    ${catkin_LIBRARIES}
+)
+
 #############
 ## Install ##
 #############
