@@ -1,2 +1,2 @@
-# swiching_by_odom
+# swiching_by_etc
 waypoint changemode <=> etc
