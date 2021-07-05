@@ -3,7 +3,7 @@
 #include <std_srvs/Trigger.h>                // サービスヘッダファイル
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
-
+#include <std_msgs/Float32.h>
 //servise callback
 //flag == true
 bool ch_flag =false;
@@ -12,14 +12,15 @@ double wait_t;
 
 std_srvs::Trigger::Request req;             // リクエストの生成
 std_srvs::Trigger::Response resp;           // レスポンスの生成
-std_srvs::SetBool::Request req_ler;             // リクエストの生成
+std_srvs::SetBool::Request req_ler_str;             // リクエストの生成
+std_srvs::SetBool::Request req_ler_end;             // リクエストの生成
 std_srvs::SetBool::Response resp_ler;           // レスポンスの生成
 geometry_msgs::PoseWithCovarianceStamped pose_msg;
 ros::ServiceClient Start_Wp_Client; 
 ros::ServiceClient StartClient; 
 ros::ServiceServer srv;
 ros::Publisher initial_pose_pub; 
-
+ros::Subscriber swiching_sub;
 void pose_set(float pose_x,float pose_y,float ori_z,float ori_w)
     {
     pose_msg.header.stamp = ros::Time::now();
@@ -38,28 +39,29 @@ void pose_set(float pose_x,float pose_y,float ori_z,float ori_w)
 
 void mode(double t)
     {
-        req_ler.data=true;
-        bool  start_learning = StartClient.call(req_ler,resp_ler); //学習の開始
+        req_ler_str.data=true;
+        bool  start_learning = StartClient.call(req_ler_str,resp_ler); //学習の開始
         ROS_INFO("learning_mode!");
         ros::Duration(t).sleep();
-        req_ler.data=false;
-        start_learning = StartClient.call(req_ler,resp_ler); //学習の終了
+        req_ler_end.data=false;
+        start_learning = StartClient.call(req_ler_end,resp_ler); //学習の終了
         initial_pose_pub.publish(pose_msg);
         bool  start_waypointnav = Start_Wp_Client.call(req,resp); //way restart
         ROS_INFO("waypoint_mode!");
     }
-bool serviceCallBack(std_srvs::SetBool::Request &req_ler,
-std_srvs::SetBool::Response &resp_ler)
+void CallBack(const std_msgs::Float32& msg)
  {
-        switch(req_ler.data)
+        if(msg.data==1)
         {
-        case 1:
-            wait_t = 20.0;
-            pose_set(-63.35,-105.17,0.96,0.279);
-        case 2:
-            wait_t = 10.0;
-            pose_set(0,0,0,0);
+        wait_t = 3.0;
+        pose_set(-63.35,-105.17,0.96,0.279);
         }
+        if(msg.data==2)
+        {
+        wait_t = 10.0;
+        pose_set(0,0,0,0);
+        }
+    
         mode(wait_t);
  }
 
@@ -71,7 +73,8 @@ int main(int argc, char **argv) {
     Start_Wp_Client = nh.serviceClient<std_srvs::Trigger>("start_wp_nav");  // クライアントの生成
     StartClient = nh.serviceClient<std_srvs::SetBool>("learn_out");  // クライアントの生成
     ROS_INFO("ready!");
-    srv = nh.advertiseService("start_call", &serviceCallBack);  // サーバー生成とコールバック関数の登録
+    swiching_sub = nh.subscribe("swiching", 10, &CallBack);
+    //srv = nh.advertiseService("start_call", &serviceCallBack);  // サーバー生成とコールバック関数の登録
     ros::spin();                              // リクエストの無限待ち
   return 0;
 }   
