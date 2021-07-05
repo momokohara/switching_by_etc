@@ -45,7 +45,7 @@ void mode(double t)
         ros::Duration(t).sleep();
         req_ler_end.data=false;
         start_learning = StartClient.call(req_ler_end,resp_ler); //学習の終了
-        initial_pose_pub.publish(pose_msg);
+       // initial_pose_pub.publish(pose_msg);
         bool  start_waypointnav = Start_Wp_Client.call(req,resp); //way restart
         ROS_INFO("waypoint_mode!");
     }
@@ -53,13 +53,13 @@ void CallBack(const std_msgs::Float32& msg)
  {
         if(msg.data==1)
         {
-        wait_t = 3.0;
+        wait_t = 5.0;
         pose_set(-63.35,-105.17,0.96,0.279);
         }
         if(msg.data==2)
         {
         wait_t = 10.0;
-        pose_set(0,0,0,0);
+        pose_set(1,1,0.96,0.279);
         }
     
         mode(wait_t);
